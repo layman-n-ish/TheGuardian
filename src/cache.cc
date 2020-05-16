@@ -1808,3 +1808,22 @@ void CACHE::increment_WQ_FULL(uint64_t address)
 {
     WQ.FULL++;
 }
+
+int CACHE::search(uint64_t address)
+{
+	uint32_t set = get_set(address);
+
+	if (set > NUM_SET) {
+		cerr << "[" << NAME << "_ERROR] " << __func__ << " invalid set index: " << set << " NUM_SET: " << NUM_SET;
+		cerr << " inval_addr: " << hex << address << dec << endl;
+		assert(0);
+	}
+
+	for(uint32_t way = 0; way < NUM_WAY; way++) {
+		if((block[set][way].valid) && (block[set][way].tag == address)) {
+			return 1; /* found */ 
+		}
+	}
+
+	return 0; /* not found */
+}
