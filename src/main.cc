@@ -491,6 +491,20 @@ void cpu_l1i_prefetcher_cache_fill(uint32_t cpu_num, uint64_t addr, uint32_t set
   ooo_cpu[cpu_num].l1i_prefetcher_cache_fill(addr, set, way, prefetch, evicted_addr);
 }
 
+#ifdef INCLUSIVE_CACHE
+void print_backreq_stats() {
+ 
+    for (int i = 0; i < NUM_CPUS; i++) {
+        cout << "\nBack-invalidation requests for CPU " << i;
+        cout << "\n#evictions in LLC: " << ooo_cpu[i].LLC_evict_counter;    
+        cout << "\n#back-invalidation requests in L1: " << ooo_cpu[i].L1_backreq_counter;
+        cout << "\t#back-invalidation requests in L2: " << ooo_cpu[i].L2_backreq_counter;
+    }
+
+    cout << endl;
+}
+#endif
+
 int main(int argc, char** argv)
 {
 	// interrupt signal hanlder
@@ -911,6 +925,10 @@ int main(int argc, char** argv)
         }
         uncore.LLC.llc_prefetcher_final_stats();
     }
+
+#ifdef INCLUSIVE_CACHE
+    print_backreq_stats();
+#endif
 
     cout << endl << "Region of Interest Statistics" << endl;
     for (uint32_t i=0; i<NUM_CPUS; i++) {

@@ -1,5 +1,6 @@
 #include "cache.h"
 #include "set.h"
+#include "ooo_cpu.h"
 
 uint64_t l2pf_access = 0;
 
@@ -19,11 +20,67 @@ void CACHE::handle_fill()
 
         uint32_t mshr_index = MSHR.next_fill_index;
 
+#ifdef INCLUSIVE_CACHE
+        uint64_t inclusion_victim;
+        int invalidation_res = -1, in_L2 = 0, in_L1 = 0;
+#endif
+
         // find victim
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
         if (cache_type == IS_LLC) {
             way = llc_find_victim(fill_cpu, MSHR.entry[mshr_index].instr_id, set, block[set], MSHR.entry[mshr_index].ip, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].type);
+            
+#ifdef INCLUSIVE_CACHE
+            /* If victim is valid at LLC level, check its validation in upper-level caches */
+            if (block[set][way].valid) {
+                
+                ooo_cpu[fill_cpu].LLC_evict_counter++;
+
+                /* Get address of the block to send a back-invalidation request to upper-level caches */
+                inclusion_victim = block[set][way].address;
+
+                /* Making the cache inclusive by invalidating the inclusion_victim block from upper-level caches */
+                for (int cpu_id = 0; cpu_id < NUM_CPUS; cpu_id++) {
+
+                    /* invalidate_entry returns -1 if block is not present in the cache, else returns way number */
+                    invalidation_res = ooo_cpu[cpu_id].L2C.invalidate_entry(inclusion_victim);
+
+                    if(invalidation_res >= 0) {
+                        if(!in_L2) {
+                            ooo_cpu[cpu_id].L2_backreq_counter++;
+                            in_L2 = 1;
+                        }
+
+                        invalidation_res = ooo_cpu[cpu_id].L1D.invalidate_entry(inclusion_victim);
+                        if((invalidation_res >= 0) && (!in_L1)) {
+                            ooo_cpu[cpu_id].L1_backreq_counter++;
+                            in_L1 = 1;
+                        }
+
+                        invalidation_res = ooo_cpu[cpu_id].L1I.invalidate_entry(inclusion_victim);
+                        if((invalidation_res >= 0) && (!in_L1)) {
+                            ooo_cpu[cpu_id].L1_backreq_counter++;
+                            in_L1 = 1;
+                        }
+                    }
+                }
+            }
+#endif
+      }
+
+#ifdef INCLUSIVE_CACHE
+        else if(cache_type == IS_L2C) {
+            /* find victim */
+            way = find_victim(fill_cpu, MSHR.entry[mshr_index].instr_id, set, block[set], MSHR.entry[mshr_index].ip, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].type);
+
+            if (block[set][way].valid) {
+                inclusion_victim = block[set][way].address;
+
+                ooo_cpu[fill_cpu].L1D.invalidate_entry(inclusion_victim);
+                ooo_cpu[fill_cpu].L1I.invalidate_entry(inclusion_victim);
+            }
         }
+#endif
         else
             way = find_victim(fill_cpu, MSHR.entry[mshr_index].instr_id, set, block[set], MSHR.entry[mshr_index].ip, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].type);
 
