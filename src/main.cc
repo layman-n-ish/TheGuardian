@@ -497,8 +497,8 @@ void print_backreq_stats() {
     for (int i = 0; i < NUM_CPUS; i++) {
         cout << "\nBack-invalidation requests for CPU " << i;
         cout << "\n#evictions in LLC: " << ooo_cpu[i].LLC_evict_counter;    
+        cout << "\n#back-invalidation requests in L2: " << ooo_cpu[i].L2_backreq_counter;
         cout << "\n#back-invalidation requests in L1: " << ooo_cpu[i].L1_backreq_counter;
-        cout << "\t#back-invalidation requests in L2: " << ooo_cpu[i].L2_backreq_counter;
     }
 
     cout << endl;
