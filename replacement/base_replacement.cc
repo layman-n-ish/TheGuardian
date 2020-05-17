@@ -67,6 +67,17 @@ void CACHE::lru_update(uint32_t set, uint32_t way)
     block[set][way].lru = 0; // promote to the MRU position
 }
 
+vector<pair<uint32_t, uint32_t>> CACHE::get_priority(uint32_t set) {
+    vector<pair<uint32_t, uint32_t>> priority;
+
+    for(uint32_t way = 0 ; way < NUM_WAY ; way++) {
+        if(block[set][way].valid) {
+            priority.push_back(make_pair(way, block[set][way].lru));
+        }
+    }
+    return priority;
+}
+
 void CACHE::replacement_final_stats()
 {
 
