@@ -16,12 +16,12 @@ uint32_t CACHE::llc_find_victim(uint32_t cpu, uint64_t instr_id, uint32_t set, c
     }
 
     int in_L2, in_L2_counter, in_R_L2; /* R -> requester */
-    int lru_way_in_LLC = -1, lru_way_in_R_L2 = -1;
-    int ways_in_other_L2_counter = 0;
+    int lru_in_LLC = -1, lru_way_in_LLC = -1, lru_in_R_L2 = -1, lru_way_in_R_L2 = -1;
+    uint32_t ways_in_other_L2_counter = 0;
     for(uint32_t way = 0; way < NUM_WAY; way++)
     {
         in_L2 = 0, in_L2_counter = 0, in_R_L2 = 0;
-        for(int cpu_id = 0; cpu_id < NUM_CPUS; cpu_id++) {
+        for(uint32_t cpu_id = 0; cpu_id < NUM_CPUS; cpu_id++) {
             if(ooo_cpu[cpu_id].L2C.search(block[set][way].address)) {
                 in_L2 = 1;
                 in_L2_counter++;
@@ -35,23 +35,44 @@ uint32_t CACHE::llc_find_victim(uint32_t cpu, uint64_t instr_id, uint32_t set, c
         }
 
         if(!in_L2) {
-            if(block[set][way].lru > block[set][lru_way_in_LLC].lru) {
+            if((int)block[set][way].lru > lru_in_LLC) {
                 lru_way_in_LLC = way;
+                lru_in_LLC = block[set][way].lru;
             }
         }
 
         else if((in_R_L2) && (in_L2_counter == 1)) { /* in R's L2 only */
-            if(block[set][way].lru > block[set][lru_way_in_R_L2].lru) {
+            if((int)block[set][way].lru > lru_in_R_L2) {
                 lru_way_in_R_L2 = way;
+                lru_in_R_L2 = block[set][way].lru;
             }
         }
     }
 
-    if(ways_in_other_L2_counter < NUM_WAY) {
-        return (block[set][lru_way_in_LLC].lru > block[set][lru_way_in_R_L2].lru) ? lru_way_in_LLC : lru_way_in_R_L2;
+    if((lru_in_LLC == -1) && (lru_in_R_L2 == -1)) { /* all ways are in LLC only */
+        for(uint32_t way = 0; way < NUM_WAY; way++) {
+            if(block[set][way].lru == NUM_WAY-1) {
+                return way;
+            }
+        }
     }
-    else {
-        /* random sampling */
+
+    else if(ways_in_other_L2_counter < NUM_WAY) { /* some but not all ways shared in some other-than-R's L2 */
+        return (lru_in_LLC > lru_in_R_L2) ? lru_way_in_LLC : lru_way_in_R_L2;
+    }
+    else { /* all ways are present in some other-than-R's L2 */
+        uint32_t way = (uint32_t)(rand() % NUM_WAY); /* random sampling */
+        for(uint32_t cpu_id = 0; cpu_id < NUM_CPUS; cpu_id++) {
+            if(ooo_cpu[cpu_id].L2C.search(block[set][way].address)) {
+                ooo_cpu[cpu_id].alarm_counter++;
+                
+                if(ooo_cpu[cpu_id].alarm_counter > THRESHOLD) {
+                    cout << "Cross-core eviction attack!" << endl;
+                    assert(0);
+                }
+            }
+        }
+        return way;
     }
 }
 

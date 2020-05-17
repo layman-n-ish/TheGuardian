@@ -55,6 +55,8 @@
 #define FILL_DRC   8
 #define FILL_DRAM 16
 
+#define THRESHOLD 100
+
 // DRAM
 #define DRAM_CHANNELS 1      // default: assuming one DIMM per one channel 4GB * 1 => 4GB off-chip memory
 #define LOG2_DRAM_CHANNELS 0

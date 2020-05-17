@@ -90,7 +90,10 @@ class O3_CPU {
           L1D{"L1D", L1D_SET, L1D_WAY, L1D_SET*L1D_WAY, L1D_WQ_SIZE, L1D_RQ_SIZE, L1D_PQ_SIZE, L1D_MSHR_SIZE},
           L2C{"L2C", L2C_SET, L2C_WAY, L2C_SET*L2C_WAY, L2C_WQ_SIZE, L2C_RQ_SIZE, L2C_PQ_SIZE, L2C_MSHR_SIZE};
 
-  int LLC_evict_counter, L1_backreq_counter, L2_backreq_counter;
+#ifdef INCLUSIVE_CACHE
+  /* inclusive caches */
+  int LLC_evict_counter, L1_backreq_counter, L2_backreq_counter, cross_core_evict_counter, alarm_counter;
+#endif
 
   // trace cache for previously decoded instructions
   
@@ -173,6 +176,8 @@ class O3_CPU {
         L1_backreq_counter = 0;
         L2_backreq_counter = 0;
         LLC_evict_counter = 0;
+        cross_core_evict_counter = 0;
+        alarm_counter = 0;
 #endif        
     }
 

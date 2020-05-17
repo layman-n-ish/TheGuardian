@@ -46,6 +46,10 @@ void CACHE::handle_fill()
                     invalidation_res = ooo_cpu[cpu_id].L2C.invalidate_entry(inclusion_victim);
 
                     if(invalidation_res >= 0) {
+                        if(cpu_id != fill_cpu) {
+                            ooo_cpu[fill_cpu].cross_core_evict_counter++;
+                        }
+
                         if(!in_L2) {
                             ooo_cpu[cpu_id].L2_backreq_counter++;
                             in_L2 = 1;
