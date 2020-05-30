@@ -49,17 +49,14 @@ uint32_t CACHE::llc_find_victim(uint32_t cpu, uint64_t instr_id, uint32_t set, c
         }
     }
 
-    if((lru_in_LLC == -1) && (lru_in_R_L2 == -1)) { /* all ways are in LLC only */
-        for(uint32_t way = 0; way < NUM_WAY; way++) {
-            if(block[set][way].lru == NUM_WAY-1) {
-                return way;
-            }
-        }
+    if(lru_in_LLC != -1) { /* atleast one way not in L2 */
+        return lru_way_in_LLC;
     }
 
-    else if(ways_in_other_L2_counter < NUM_WAY) { /* some but not all ways shared in some other-than-R's L2 */
-        return (lru_in_LLC > lru_in_R_L2) ? lru_way_in_LLC : lru_way_in_R_L2;
+    else if(lru_in_R_L2 != -1) { /* atleast one way in R's L2 only */
+        return lru_way_in_R_L2;
     }
+    
     else { /* all ways are present in some other-than-R's L2 */
         uint32_t way = (uint32_t)(rand() % NUM_WAY); /* random sampling */
         for(uint32_t cpu_id = 0; cpu_id < NUM_CPUS; cpu_id++) {
