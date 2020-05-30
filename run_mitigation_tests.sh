@@ -10,12 +10,12 @@ fi
 LVL="$1"
 N_CORES=2
 N_WARMUP_INSTR=1 # per million
-N_SIM_INSTR=30 # per million
-N_LLC_SETS=2048
-N_LLC_WAYS=16
+N_SIM_INSTR=10 # per million
+N_LLC_SETS=2048 # per CPU
+N_LLC_WAYS=32
 
 # modify LLC configurations
-sed -i -e "s/#define LLC_SET NUM_CPUS*2048/#define LLC_SET NUM_CPUS*$N_LLC_SETS/g" inc/cache.h
+sed -i -e "s/#define LLC_SET NUM_CPUS\*2048/#define LLC_SET NUM_CPUS\*$N_LLC_SETS/g" inc/cache.h
 sed -i -e "s/#define LLC_WAY 16/#define LLC_WAY $N_LLC_WAYS/g" inc/cache.h
 
 LLC_REPL_DIR="./replacement"
@@ -52,7 +52,7 @@ if [ $LVL == 'r' ] || [ $LVL == 'a' ]; then
                 bin=$(echo $bin_path | cut -d/ -f3)
                 echo "Running $bin binary..."
                 if [ $N_CORES -eq 2 ]; then
-                        ./run_2core.sh $bin $N_WARMUP_INSTR $N_SIM_INSTR 0 $TRACE_2 $TRACE_3
+                        ./run_2core.sh $bin $N_WARMUP_INSTR $N_SIM_INSTR 0 $TRACE_1 $TRACE_2
                 else
                         ./run_4core.sh $bin $N_WARMUP_INSTR $N_SIM_INSTR 0 $TRACE_0 $TRACE_1 $TRACE_2 $TRACE_3
                 fi
@@ -64,12 +64,12 @@ if [ $LVL == 'r' ] || [ $LVL == 'a' ]; then
         fi
 
         for results_path in "$RESULTS_DIR"/*; do
-                attrs=$(echo $results_path | cut -d/ -f4 | cut -d- -f7,8 | cut -d. -f1)
+                attrs=$(echo $results_path | cut -d/ -f3 | cut -d- -f7,8 | cut -d. -f1)
                 out_file="${attrs}-${N_SIM_INSTR}M-${N_LLC_SETS}sets-${N_LLC_WAYS}ways"
                 sed -n -e '1,12p' -e '/Total Simulation Statistics/, /Region of Interest Statistics/ p' $results_path > ${BENCHMARKS_DIR}/${out_file}
         done
 fi
 
 # restore modified LLC configurations for next run
-sed -i -e "s/#define LLC_SET NUM_CPUS*$N_LLC_SETS/#define LLC_SET NUM_CPUS*2048/g" inc/cache.h
+sed -i -e "s/#define LLC_SET NUM_CPUS\*$N_LLC_SETS/#define LLC_SET NUM_CPUS\*2048/g" inc/cache.h
 sed -i -e "s/#define LLC_WAY $N_LLC_WAYS/#define LLC_WAY 16/g" inc/cache.h
