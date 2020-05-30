@@ -1,0 +1,70 @@
+
+*** ChampSim Multicore Out-of-Order Simulator ***
+
+Warmup Instructions: 1000000
+Simulation Instructions: 30000000
+Number of CPUs: 2
+LLC sets: 512
+LLC ways: 16
+Off-chip DRAM Size: 4096 MB Channels: 1 Width: 64-bit Data Rate: 3200 MT/s
+
+CPU 0 runs dpc3_traces/gamess_196B.trace.xz
+CPU 1 runs dpc3_traces/gcc_39B.trace.xz
+Total Simulation Statistics (not including warmup)
+
+CPU 0 cumulative IPC: 1.46241 instructions: 33777910 cycles: 23097485
+L1D TOTAL     ACCESS:   10636779  HIT:   10603975  MISS:      32804
+L1D LOAD      ACCESS:    6967225  HIT:    6944272  MISS:      22953
+L1D RFO       ACCESS:    3669554  HIT:    3659703  MISS:       9851
+L1D PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+L1D WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
+L1I TOTAL     ACCESS:    5242422  HIT:    5218165  MISS:      24257
+L1I LOAD      ACCESS:    5242422  HIT:    5218165  MISS:      24257
+L1I RFO       ACCESS:          0  HIT:          0  MISS:          0
+L1I PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+L1I WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
+L2C TOTAL     ACCESS:      69043  HIT:      63030  MISS:       6013
+L2C LOAD      ACCESS:      47210  HIT:      41727  MISS:       5483
+L2C RFO       ACCESS:       9833  HIT:       9480  MISS:        353
+L2C PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+L2C WRITEBACK ACCESS:      12000  HIT:      11823  MISS:        177
+LLC TOTAL     ACCESS:       6451  HIT:        326  MISS:       6125
+LLC LOAD      ACCESS:       5483  HIT:         47  MISS:       5436
+LLC RFO       ACCESS:        353  HIT:         32  MISS:        321
+LLC PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+LLC WRITEBACK ACCESS:        615  HIT:        247  MISS:        368
+
+CPU 1 cumulative IPC: 1.29884 instructions: 30000003 cycles: 23097485
+L1D TOTAL     ACCESS:    9985487  HIT:    9945734  MISS:      39753
+L1D LOAD      ACCESS:    4694328  HIT:    4655699  MISS:      38629
+L1D RFO       ACCESS:    5291159  HIT:    5290035  MISS:       1124
+L1D PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+L1D WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
+L1I TOTAL     ACCESS:    7407626  HIT:    7407459  MISS:        167
+L1I LOAD      ACCESS:    7407626  HIT:    7407459  MISS:        167
+L1I RFO       ACCESS:          0  HIT:          0  MISS:          0
+L1I PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+L1I WRITEBACK ACCESS:          0  HIT:          0  MISS:          0
+L2C TOTAL     ACCESS:      42924  HIT:      34518  MISS:       8406
+L2C LOAD      ACCESS:      38795  HIT:      31433  MISS:       7362
+L2C RFO       ACCESS:       1123  HIT:        103  MISS:       1020
+L2C PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+L2C WRITEBACK ACCESS:       3006  HIT:       2982  MISS:         24
+LLC TOTAL     ACCESS:       9119  HIT:         64  MISS:       9055
+LLC LOAD      ACCESS:       7362  HIT:         23  MISS:       7339
+LLC RFO       ACCESS:       1020  HIT:          0  MISS:       1020
+LLC PREFETCH  ACCESS:          0  HIT:          0  MISS:          0
+LLC WRITEBACK ACCESS:        737  HIT:         41  MISS:        696
+
+Back-invalidation requests for CPU 0
+	#evictions in LLC: 3469
+	#cross-core evictions: 1797
+	#back-invalidation requests in L2: 3436
+	#back-invalidation requests in L1: 1425
+Back-invalidation requests for CPU 1
+	#evictions in LLC: 4323
+	#cross-core evictions: 1848
+	#back-invalidation requests in L2: 4164
+	#back-invalidation requests in L1: 795
+
+Region of Interest Statistics
