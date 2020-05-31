@@ -61,7 +61,42 @@ lorem ipsum
 
 ## Results and Analysis
 
-lorem ipsum
+Tests were concluded with various variable attributes such as `N_CORES`, `N_SIM_INSTR`, `N_LLC_SETS`, etc. The extracted results can be found in the [`benchmarks/*`](https://github.com/layman-n-ish/TheGuardian/tree/master/benchmarks) directory. The tests were executed on ['dpc3' traces](https://dpc3.compas.cs.stonybrook.edu/?SW_IS) viz. **bwaves_98B.trace.xz**, **gamess_196B.trace.xz**, **gcc_39B.trace.xz** and **libquantum_964B.trace.xz**. 
+
+Some insights we gained were:
+
+- To show our implementaion of SHARP to mitigate cache side channel attacks works, we introduced a metric, [`cross_core_evict_counter`](https://github.com/layman-n-ish/TheGuardian/blob/master/inc/ooo_cpu.h#L95), which accumulates the number of cross-core evictions (inclusion victims). Our goal is, then, simply to show that it converges to zero (ideally), which can be seen in any of the `benchmarks/lru_sharp-*` results. A snippet of [`benchmarks/lru_sharp-2core-30M-2048sets-16ways`](https://github.com/layman-n-ish/TheGuardian/blob/master/benchmarks/lru_sharp-2core-30M-2048sets-16ways) highlighting that is shown below:
+
+```
+Back-invalidation requests for CPU 0
+	#evictions in LLC: 20798
+	#cross-core evictions: 0
+	#back-invalidation requests in L2: 13964
+	#back-invalidation requests in L1: 1101
+Back-invalidation requests for CPU 1
+	#evictions in LLC: 925295
+	#cross-core evictions: 0
+	#back-invalidation requests in L2: 0
+	#back-invalidation requests in L1: 0
+```
+whereas the original implementation of LRU had plenty cross-core evictions seen below in the result snippet of [`benchmarks/lru-2core-30M-2048sets-16ways`](https://github.com/layman-n-ish/TheGuardian/blob/master/benchmarks/lru-2core-30M-2048sets-16ways):
+
+```
+Back-invalidation requests for CPU 0
+	#evictions in LLC: 28702
+	#cross-core evictions: 0
+	#back-invalidation requests in L2: 28144
+	#back-invalidation requests in L1: 9216
+Back-invalidation requests for CPU 1
+	#evictions in LLC: 925224
+	#cross-core evictions: 27013
+	#back-invalidation requests in L2: 0
+	#back-invalidation requests in L1: 0
+```
+
+- Performace gain is noticed by applying the modified replacement policy (LRU-SHARP) as the [IPC](https://en.wikipedia.org/wiki/Instructions_per_cycle) (Instructions per Cycle) increases.
+
+- Back-invalidation requests & evictions in LLC increases as number of simulation instructions (`N_SIM_INSTR`) increases.
 
 ## Acknowledgements
 
